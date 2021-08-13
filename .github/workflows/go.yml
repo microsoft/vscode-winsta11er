@@ -18,4 +18,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        goversion: "https://golang.org/dl/go1.17rc2.windows-amd64.zip"
+        goversion: 1.17rc2
