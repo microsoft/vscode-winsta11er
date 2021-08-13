@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         goos: [ "windows" ]
-        goarch: ["386", "amd64", "arm64"]
+        goarch: ["386", "amd64" ]
     steps:
     - uses: actions/checkout@v2
     - uses: wangyoucao577/go-release-action@v1.19
@@ -20,3 +20,4 @@ jobs:
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         goversion: 1.17rc2
+        binary_name: "vscode-winsta11er-$(matrix.goarch)"
