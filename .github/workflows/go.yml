@@ -8,10 +8,6 @@ jobs:
   release:
     name: Release
     runs-on: windows-latest
-    strategy:
-      matrix:
-        goos: [ "windows" ]
-        goarch: ["386", "amd64", "arm64" ]
     steps:
     - uses: actions/checkout@v2
 
@@ -21,9 +17,18 @@ jobs:
         go-version: 1.17.0-rc2
         stable: 'false'
 
-    - name: Build
-      run: go build -v -o "vscode-winsta11er-${{ matrix.goarch }}.exe"
-
+    - name: Build x64
+      run: |
+        $env:GOARCH="amd64"
+        go build -v -o "vscode-winsta11er-x64.exe"
+    - name: Build ia32
+      run: |
+        $env:GOARCH="386"
+        go build -v -o "vscode-winsta11er-ia32.exe"
+    - name: Build arm64
+      run: |
+        $env:GOARCH="arm64"
+        go build -v -o "vscode-winsta11er-arm64.exe"
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
