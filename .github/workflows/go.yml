@@ -22,7 +22,7 @@ jobs:
         stable: 'false'
 
     - name: Build
-      run: go build -v -o "vscode-winsta11er-$MATRIX_GOARCH.exe"
+      run: go build -v -o "vscode-winsta11er-${{ matrix.goarch }}.exe"
 
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
