@@ -1,22 +1,31 @@
 name: Release Binaries
 
-on: 
-  release:
-    types: [created]
+on:
+  push:
+    tags: "v*"
 
 jobs:
-  release-linux-amd64:
+  release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         goos: [ "windows" ]
         goarch: ["386", "amd64", "arm64" ]
     steps:
     - uses: actions/checkout@v2
-    - uses: wangyoucao577/go-release-action@v1.19
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        goversion: "https://golang.org/dl/go1.17rc2.linux-amd64.tar.gz"
+        go-version: 1.17.rc2
+
+    - name: Build
+      run: go build -v -o "vscode-winsta11er-$(matrix.goarch).exe"
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          *.exe
