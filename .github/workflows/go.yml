@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         goos: [ "windows" ]
-        goarch: ["386", "amd64" ]
+        goarch: ["386", "amd64", "arm64" ]
     steps:
     - uses: actions/checkout@v2
     - uses: wangyoucao577/go-release-action@v1.19
@@ -19,5 +19,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        goversion: 1.17rc2
-        binary_name: "vscode-winsta11er-$(matrix.goarch)"
+        goversion: "https://golang.org/dl/go1.17rc2.linux-amd64.tar.gz"
