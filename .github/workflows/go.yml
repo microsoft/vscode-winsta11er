@@ -20,15 +20,15 @@ jobs:
     - name: Build x64
       run: |
         $env:GOARCH="amd64"
-        go build -v -o "vscode-winsta11er-x64.exe"
+        go build -v -o "vscode-winsta11er-x64.exe" -ldflags -H=windowsgui
     - name: Build ia32
       run: |
         $env:GOARCH="386"
-        go build -v -o "vscode-winsta11er-ia32.exe"
+        go build -v -o "vscode-winsta11er-ia32.exe" -ldflags -H=windowsgui
     - name: Build arm64
       run: |
         $env:GOARCH="arm64"
-        go build -v -o "vscode-winsta11er-arm64.exe"
+        go build -v -o "vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
