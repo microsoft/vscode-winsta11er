@@ -2,6 +2,10 @@
 
 This repo contains the code for a simple Go-based installer for the new Windows store.
 
+## Releases
+
+To create a release, create and push a new tag of the form `vX.X.X`. This will trigger the [GitHub Action](https://github.com/microsoft/vscode-winsta11er/actions/workflows/go.yml) and automatically create a new release. The releases are intended to be consumed through the store on Windows 11, not directly.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
