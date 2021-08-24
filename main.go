@@ -25,12 +25,12 @@ import (
 )
 
 func main() {
-	arch := GetSystemInfo()
-	installer_dir, err := SetupTemporaryDirectory(arch)
+	arch_pkg := GetSystemInfo()
+	installer_dir, err := SetupTemporaryDirectory()
 	checkError(err)
-	release_info, err := GetReleaseInfo(arch)
+	release_info, err := GetReleaseInfo(arch_pkg)
 	checkError(err)
-	installer_path, err := DownloadInstaller(installer_dir, arch, release_info)
+	installer_path, err := DownloadInstaller(installer_dir, arch_pkg, release_info)
 	checkError(err)
 	err = RunInstaller(installer_path)
 	checkError(err)
@@ -38,20 +38,20 @@ func main() {
 	checkError(err)
 }
 
-func GetSystemInfo() (arch string) {
+func GetSystemInfo() (arch_pkg string) {
 	switch runtime.GOARCH {
 	case "amd64":
-		arch = "x64"
+		arch_pkg = "x64-user"
 	case "386":
-		arch = "ia32"
+		arch_pkg = "user"
 	case "arm64":
-		arch = "arm64"
+		arch_pkg = "arm64-user"
 	}
 
 	return
 }
 
-func SetupTemporaryDirectory(arch string) (installer_dir string, err error) {
+func SetupTemporaryDirectory() (installer_dir string, err error) {
 	return ioutil.TempDir("", "vscode-winsta11er")
 }
 
@@ -61,8 +61,8 @@ type ReleaseInfo struct {
 	Sha256Hash string `json:"sha256hash"`
 }
 
-func GetReleaseInfo(arch string) (info *ReleaseInfo, err error) {
-	apiUrl := fmt.Sprintf("https://update.code.visualstudio.com/api/update/win32-%s-user/stable/latest", arch)
+func GetReleaseInfo(arch_pkg string) (info *ReleaseInfo, err error) {
+	apiUrl := fmt.Sprintf("https://update.code.visualstudio.com/api/update/win32-%s/stable/latest", arch_pkg)
 	fmt.Printf("Requesting hash from %s.\n", apiUrl)
 	client := http.Client{
 		Timeout: 30 * time.Second,
@@ -91,10 +91,10 @@ func GetReleaseInfo(arch string) (info *ReleaseInfo, err error) {
 	return info, nil
 }
 
-func DownloadInstaller(installer_dir, arch string, info *ReleaseInfo) (installer_path string, err error) {
+func DownloadInstaller(installer_dir, arch_pkg string, info *ReleaseInfo) (installer_path string, err error) {
 	fmt.Printf("Downloading installer from %s.\n", info.Url)
 
-	file, err := os.CreateTemp(installer_dir, fmt.Sprintf("vscode-win32-%s-user*.exe", arch))
+	file, err := os.CreateTemp(installer_dir, fmt.Sprintf("vscode-win32-%s*.exe", arch_pkg))
 	if err != nil {
 		return "", err
 	}
