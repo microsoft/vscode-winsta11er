@@ -11,27 +11,25 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17.0-rc2
-        stable: 'false'
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: Restore NuGet
+      run: msbuild vscode-winsta11er.sln -t:restore -p:RestorePackagesConfig=true
 
     - name: Build x64
       run: |
-        $env:GOARCH="amd64"
-        go build -v -o "vscode-winsta11er-x64.exe" -ldflags -H=windowsgui
+         msbuild vscode-winsta11er.sln /p:Configuration=Release /p:Platform=x64
     - name: Build ia32
       run: |
-        $env:GOARCH="386"
-        go build -v -o "vscode-winsta11er-ia32.exe" -ldflags -H=windowsgui
+         msbuild vscode-winsta11er.sln /p:Configuration=Release /p:Platform=x86
     - name: Build arm64
       run: |
-        $env:GOARCH="arm64"
-        go build -v -o "vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui
+         msbuild vscode-winsta11er.sln /p:Configuration=Release /p:Platform=ARM64
+
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          *.exe
+          **/vscode-winsta11er-*.exe
