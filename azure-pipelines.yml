@@ -5,6 +5,10 @@
 
 trigger: none
 
+variables:
+  - name: skipComponentGovernanceDetection
+    value: true
+
 pool:
   vmImage: windows-latest
 
@@ -16,7 +20,73 @@ steps:
 
   - powershell: |
       $env:GOARCH="arm64"
-      go build -v -o "vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui
+      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui
     displayName: Build arm64
 
+  - powershell: |
+      $env:GOARCH="386"
+      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-ia32.exe" -ldflags -H=windowsgui
+    displayName: Build x86
+
+  - powershell: |
+      $env:GOARCH="amd64"
+      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-x64.exe" -ldflags -H=windowsgui
+    displayName: Build x64
+
+  - task: EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'ESRP CodeSign'
+      FolderPath: '$(Build.BinariesDirectory)'
+      Pattern: 'vscode-winsta11er-*.exe'
+      signConfigType: 'inlineSignParams'
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-230012",
+            "operationSetCode": "SigntoolSign",
+            "parameters": [
+              {
+                "parameterName": "OpusName",
+                "parameterValue": "VS Code"
+              },
+              {
+                "parameterName": "OpusInfo",
+                "parameterValue": "https://code.visualstudio.com/"
+              },
+              {
+                "parameterName": "Append",
+                "parameterValue": "/as"
+              },
+              {
+                "parameterName": "FileDigest",
+                "parameterValue": "/fd \"SHA256\""
+              },
+              {
+                "parameterName": "PageHash",
+                "parameterValue": "/NPH"
+              },
+              {
+                "parameterName": "TimeStamp",
+                "parameterValue": "/tr \"http: //rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+              }
+            ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          },
+          {
+            "keyCode": "CP-230012",
+            "operationSetCode": "SigntoolVerify",
+            "parameters": [
+              {
+                "parameterName": "VerifyAll",
+                "parameterValue": "/all"
+              }
+            ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
+      SessionTimeout: '60'
+      MaxConcurrency: '50'
+      MaxRetryAttempts: '5'
 
