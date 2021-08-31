@@ -1,0 +1,23 @@
+# Go
+# Build your Go project.
+# Add steps that test, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/go
+
+trigger:
+- main
+
+pool:
+  vmImage: windows-latest
+
+steps:
+  - task: GoTool@0
+    inputs:
+      version: '1.17'
+    displayName: Install Go
+
+  - powershell: |
+      $env:GOARCH="arm64"
+      go build -v -o "vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui
+    displayName: Build arm64
+
+
