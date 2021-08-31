@@ -87,6 +87,7 @@ steps:
           }
         ]
       SessionTimeout: '60'
+      ServiceEndpointUrl: 'https://api.esrp.microsoft.com/api/v1'
       MaxConcurrency: '50'
       MaxRetryAttempts: '5'
 
