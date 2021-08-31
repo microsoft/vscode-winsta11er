@@ -3,7 +3,10 @@
 # Add steps that test, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/go
 
-trigger: none
+trigger:
+  tags:
+    include:
+      - v*
 
 variables:
   - name: skipComponentGovernanceDetection
@@ -22,11 +25,6 @@ steps:
       $env:GOARCH="arm64"
       go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui
     displayName: Build arm64
-
-  - powershell: |
-      $env:GOARCH="386"
-      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-ia32.exe" -ldflags -H=windowsgui
-    displayName: Build x86
 
   - powershell: |
       $env:GOARCH="amd64"
@@ -91,3 +89,15 @@ steps:
       MaxConcurrency: '50'
       MaxRetryAttempts: '5'
 
+  - task: GitHubRelease@1
+    inputs:
+      gitHubConnection: 'Microsoft'
+      repositoryName: '$(Build.Repository.Name)'
+      action: 'create'
+      target: '$(Build.SourceVersion)'
+      tagSource: 'gitTag'
+      tagPattern: 'v*'
+      releaseNotesSource: 'inline'
+      assets: '$(Build.BinariesDirectory)/*.exe'
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'commitBased'
