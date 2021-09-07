@@ -1,3 +1,3 @@
-module main
+module github.com/winsta11er
 
-go 1.16
+go 1.17

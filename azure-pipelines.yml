@@ -23,13 +23,23 @@ steps:
 
   - powershell: |
       $env:GOARCH="arm64"
-      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui
-    displayName: Build arm64
+      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-arm64.exe" -ldflags -H=windowsgui ./stable
+    displayName: Build arm64 (Stable)
 
   - powershell: |
       $env:GOARCH="amd64"
-      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-x64.exe" -ldflags -H=windowsgui
-    displayName: Build x64
+      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-x64.exe" -ldflags -H=windowsgui ./stable
+    displayName: Build x64 (Stable)
+
+  - powershell: |
+      $env:GOARCH="arm64"
+      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-insiders-arm64.exe" -ldflags -H=windowsgui ./insiders
+    displayName: Build arm64 (Insiders)
+
+  - powershell: |
+      $env:GOARCH="amd64"
+      go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-insiders-x64.exe" -ldflags -H=windowsgui ./insiders
+    displayName: Build x64 (Insiders)
 
   - task: EsrpCodeSigning@1
     inputs:

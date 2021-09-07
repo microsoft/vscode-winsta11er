@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package main
+package common
 
 import (
 	"bytes"
@@ -24,11 +24,11 @@ import (
 	"time"
 )
 
-func main() {
+func MainBase(quality string) {
 	arch_pkg := GetSystemInfo()
-	installer_dir, err := SetupTemporaryDirectory()
+	installer_dir, err := SetupTemporaryDirectory(quality)
 	checkError(err)
-	release_info, err := GetReleaseInfo(arch_pkg)
+	release_info, err := GetReleaseInfo(arch_pkg, quality)
 	checkError(err)
 	installer_path, err := DownloadInstaller(installer_dir, arch_pkg, release_info)
 	checkError(err)
@@ -51,8 +51,8 @@ func GetSystemInfo() (arch_pkg string) {
 	return
 }
 
-func SetupTemporaryDirectory() (installer_dir string, err error) {
-	return ioutil.TempDir("", "vscode-winsta11er")
+func SetupTemporaryDirectory(quality string) (installer_dir string, err error) {
+	return ioutil.TempDir("", fmt.Sprintf("vscode-winsta11er-%s", quality))
 }
 
 type ReleaseInfo struct {
@@ -61,8 +61,8 @@ type ReleaseInfo struct {
 	Sha256Hash string `json:"sha256hash"`
 }
 
-func GetReleaseInfo(arch_pkg string) (info *ReleaseInfo, err error) {
-	apiUrl := fmt.Sprintf("https://update.code.visualstudio.com/api/update/win32-%s/stable/latest", arch_pkg)
+func GetReleaseInfo(arch_pkg string, quality string) (info *ReleaseInfo, err error) {
+	apiUrl := fmt.Sprintf("https://update.code.visualstudio.com/api/update/win32-%s/%s/latest", arch_pkg, quality)
 	fmt.Printf("Requesting hash from %s.\n", apiUrl)
 	client := http.Client{
 		Timeout: 30 * time.Second,
