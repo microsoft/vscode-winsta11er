@@ -8,9 +8,7 @@ package main
 import (
 	"github.com/winsta11er/common"
 )
- 
- func main() {
-	 common.MainBase("insider")
- }
- 
- 
+
+func main() {
+	common.MainBase("insider")
+}
