@@ -13,7 +13,7 @@ variables:
     value: true
 
 pool:
-  vmImage: windows-latest
+  vmImage: VS2017-Win2016
 
 steps:
   - task: GoTool@0
