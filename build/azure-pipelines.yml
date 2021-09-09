@@ -61,7 +61,7 @@ steps:
     displayName: Find ESRP CLI
 
   - powershell: |
-      node sign $env:EsrpCliDllPath windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.BinariesDirectory) 'vscode-winsta11er-*.exe'
+      node .\build\sign $env:EsrpCliDllPath windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.BinariesDirectory) 'vscode-winsta11er-*.exe'
     displayName: Codesign
 
   - task: GitHubRelease@1

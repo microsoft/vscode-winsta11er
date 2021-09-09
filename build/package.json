@@ -1,0 +1,8 @@
+{
+  "name": "vscode-winsta11er-build",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "tmp": "^0.2.1"
+  }
+}
