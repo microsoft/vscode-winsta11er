@@ -52,7 +52,6 @@ steps:
     displayName: Download ESRPClient
 
   - powershell: |
-      $ErrorActionPreference = "Stop"
       $EsrpClientTool = (gci -directory -filter EsrpClientTool_* $(Agent.RootDirectory)\_tasks | Select-Object -last 1).FullName
       $EsrpCliZip = (gci -recurse -filter esrpcli.*.zip $EsrpClientTool | Select-Object -last 1).FullName
       mkdir -p $(Agent.TempDirectory)\esrpcli
@@ -62,8 +61,7 @@ steps:
     displayName: Find ESRP CLI
 
   - powershell: |
-      $ErrorActionPreference = "Stop"
-      exec { node build\azure-pipelines\common\sign $env:EsrpCliDllPath windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.BinariesDirectory) 'vscode-winsta11er-*.exe' }
+      node build\azure-pipelines\common\sign $env:EsrpCliDllPath windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.BinariesDirectory) 'vscode-winsta11er-*.exe'
     displayName: Codesign
 
   - task: GitHubRelease@1
