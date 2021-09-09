@@ -41,63 +41,30 @@ steps:
       go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-insiders-x64.exe" -ldflags -H=windowsgui ./insiders
     displayName: Build x64 (Insiders)
 
-  - task: EsrpCodeSigning@1
+  - task: AzureKeyVault@1
     inputs:
-      ConnectedServiceName: 'ESRP CodeSign'
-      FolderPath: '$(Build.BinariesDirectory)'
-      Pattern: 'vscode-winsta11er-*.exe'
-      signConfigType: 'inlineSignParams'
-      inlineOperation: |
-        [
-          {
-            "keyCode": "CP-230012",
-            "operationSetCode": "SigntoolSign",
-            "parameters": [
-              {
-                "parameterName": "OpusName",
-                "parameterValue": "VS Code"
-              },
-              {
-                "parameterName": "OpusInfo",
-                "parameterValue": "https://code.visualstudio.com/"
-              },
-              {
-                "parameterName": "Append",
-                "parameterValue": "/as"
-              },
-              {
-                "parameterName": "FileDigest",
-                "parameterValue": "/fd \"SHA256\""
-              },
-              {
-                "parameterName": "PageHash",
-                "parameterValue": "/NPH"
-              },
-              {
-                "parameterName": "TimeStamp",
-                "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-              }
-            ],
-            "toolName": "signtool.exe",
-            "toolVersion": "6.2.9304.0"
-          },
-          {
-            "keyCode": "CP-230012",
-            "operationSetCode": "SigntoolVerify",
-            "parameters": [
-              {
-                "parameterName": "VerifyAll",
-                "parameterValue": "/all"
-              }
-            ],
-            "toolName": "signtool.exe",
-            "toolVersion": "6.2.9304.0"
-          }
-        ]
-      SessionTimeout: '60'
-      ServiceEndpointUrl: 'https://api.esrp.microsoft.com/api/v1'
-      MaxConcurrency: '50'
-      MaxRetryAttempts: '5'
+      azureSubscription: "vscode-builds-subscription"
+      KeyVaultName: vscode
+      SecretsFilter: "ESRP-PKI,esrp-aad-username,esrp-aad-password"
+    displayName: Azure Key Vault
+
+  - task: EsrpClientTool@1
+    displayName: Download ESRPClient
+
+  - powershell: |
+      $ErrorActionPreference = "Stop"
+      $EsrpClientTool = (gci -directory -filter EsrpClientTool_* $(Agent.RootDirectory)\_tasks | Select-Object -last 1).FullName
+      $EsrpCliZip = (gci -recurse -filter esrpcli.*.zip $EsrpClientTool | Select-Object -last 1).FullName
+      mkdir -p $(Agent.TempDirectory)\esrpcli
+      Expand-Archive -Path $EsrpCliZip -DestinationPath $(Agent.TempDirectory)\esrpcli
+      $EsrpCliDllPath = (gci -recurse -filter esrpcli.dll $(Agent.TempDirectory)\esrpcli | Select-Object -last 1).FullName
+      echo "##vso[task.setvariable variable=EsrpCliDllPath]$EsrpCliDllPath"
+    displayName: Find ESRP CLI
+
+  - powershell: |
+      $ErrorActionPreference = "Stop"
+      exec { node build\azure-pipelines\common\sign $env:EsrpCliDllPath windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.BinariesDirectory) 'vscode-winsta11er-*.exe' }
+    displayName: Codesign
 
   - task: GitHubRelease@1
     inputs:
