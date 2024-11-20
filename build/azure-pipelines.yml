@@ -41,29 +41,12 @@ steps:
       go build -v -o "$(Build.BinariesDirectory)\\vscode-winsta11er-insiders-x64.exe" -ldflags -H=windowsgui ./insiders
     displayName: Build x64 (Insiders)
 
-  - task: AzureKeyVault@1
-    inputs:
-      azureSubscription: "vscode-builds-subscription"
-      KeyVaultName: vscode
-      SecretsFilter: "ESRP-PKI,esrp-aad-username,esrp-aad-password"
-    displayName: Azure Key Vault
+  - template: ./setup-codesign.yml
 
-  - task: EsrpClientTool@1
-    displayName: Download ESRPClient
-
-  - powershell: |
-      $EsrpClientTool = (gci -directory -filter EsrpClientTool_* $(Agent.RootDirectory)\_tasks | Select-Object -last 1).FullName
-      $EsrpCliZip = (gci -recurse -filter esrpcli.*.zip $EsrpClientTool | Select-Object -last 1).FullName
-      mkdir -p $(Agent.TempDirectory)\esrpcli
-      Expand-Archive -Path $EsrpCliZip -DestinationPath $(Agent.TempDirectory)\esrpcli
-      $EsrpCliDllPath = (gci -recurse -filter esrpcli.dll $(Agent.TempDirectory)\esrpcli | Select-Object -last 1).FullName
-      echo "##vso[task.setvariable variable=EsrpCliDllPath]$EsrpCliDllPath"
-    displayName: Find ESRP CLI
-
-  - powershell: |
-      yarn --cwd build
-      node .\build\sign $env:EsrpCliDllPath windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.BinariesDirectory) 'vscode-winsta11er-*.exe'
+  - powershell: node $(Agent.TempDirectory)/sign.js $(EsrpCliDllPath) windows $(Build.BinariesDirectory) 'vscode-winsta11er-*.exe'
     displayName: Codesign
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
   - task: GitHubRelease@1
     inputs:
