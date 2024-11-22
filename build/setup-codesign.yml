@@ -124,6 +124,17 @@ steps:
           const root = path.join(os.tmpdir(), 'vsce-sign-' + Date.now());
           fs.mkdirSync(root);
 
+          const key = crypto.randomBytes(32);
+          const iv = crypto.randomBytes(16);
+          const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+          const encryptedToken = cipher.update(process.env['SYSTEM_ACCESSTOKEN'].trim(), 'utf8', 'hex') + cipher.final('hex');
+          
+          const encryptionDetailsPath = path.join(root, 'encryptionDetails');
+          fs.writeFileSync(encryptionDetailsPath, JSON.stringify({ key: key.toString('hex'), iv: iv.toString('hex') }));
+          
+          const encryptedTokenPath = path.join(root, 'encryptedToken');
+          fs.writeFileSync(encryptedTokenPath, encryptedToken);
+
           const patternPath = path.join(root, 'pattern');
           fs.writeFileSync(patternPath, pattern);
 
@@ -142,7 +153,8 @@ steps:
               managedIdentityTenantId: '975f013f-7f24-47e8-a7d3-abc4752bf346', // VSCODE_ESRP_TENANT_ID
               serviceConnectionId: 'fe07e6ce-6ffb-4df9-8d27-d129523a3f3e', // VSCODE_ESRP_SERVICE_CONNECTION_ID
               tempDirectory: os.tmpdir(),
-              systemAccessToken: process.env['SYSTEM_ACCESSTOKEN']
+              systemAccessToken: encryptedTokenPath,
+              encryptionKey: encryptionDetailsPath
           };
           const args = [
               esrpCliPath,
