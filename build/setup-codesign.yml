@@ -32,6 +32,7 @@ steps:
       const fs = require("fs");
       const path = require("path");
       const os = require("os");
+      const crypto = require("crypto");
 
       function getParams(type) {
           switch (type) {
